@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ledger — To-Dos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE1; --ink:#242820; --ink-soft:#5B6055;
+    --line:#D7D2C4; --accent:#2F5D50; --accent-soft:#DCE6DF;
+    --card:#F7F5EE; --danger:#A3432F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1B1E19; --ink:#EDEAE1; --ink-soft:#A9AC9F;
+      --line:#33362D; --accent:#7FB79E; --accent-soft:#26312A;
+      --card:#232620; --danger:#E28268;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1B1E19; --ink:#EDEAE1; --ink-soft:#A9AC9F;
+    --line:#33362D; --accent:#7FB79E; --accent-soft:#26312A;
+    --card:#232620; --danger:#E28268;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    min-height:100vh;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:2.5rem 1.5rem 4rem;}
+  h1{
+    font-family:'Fraunces',serif; font-weight:600; font-size:2.1rem;
+    margin:0 0 .15rem; letter-spacing:-.01em;
+  }
+  .sub{color:var(--ink-soft); font-size:.95rem; margin:0 0 2rem;}
+
+  .add-row{
+    display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1.75rem;
+  }
+  .add-row input[type="text"]{
+    flex:1 1 220px; padding:.7rem .9rem; border-radius:8px;
+    border:1px solid var(--line); background:var(--card); color:var(--ink);
+    font-family:inherit; font-size:.95rem;
+  }
+  .add-row select{
+    padding:.7rem .8rem; border-radius:8px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink); font-family:inherit; font-size:.9rem;
+  }
+  .add-row button{
+    padding:.7rem 1.1rem; border-radius:8px; border:none;
+    background:var(--accent); color:var(--paper); font-family:inherit;
+    font-weight:600; font-size:.9rem; cursor:pointer;
+  }
+  .add-row button:hover{opacity:.9;}
+
+  .cat-manage{
+    display:flex; gap:.5rem; align-items:center; margin-bottom:2.25rem;
+    flex-wrap:wrap;
+  }
+  .cat-manage input{
+    padding:.5rem .7rem; border-radius:7px; border:1px solid var(--line);
+    background:var(--card); color:var(--ink); font-family:inherit; font-size:.85rem;
+    width:150px;
+  }
+  .cat-manage input[type="color"]{width:38px; padding:.2rem; cursor:pointer;}
+  .cat-manage button{
+    padding:.5rem .8rem; border-radius:7px; border:1px solid var(--line);
+    background:transparent; color:var(--ink-soft); font-family:inherit;
+    font-size:.8rem; cursor:pointer;
+  }
+
+  .filters{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1.5rem;}
+  .chip{
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.35rem .7rem; border-radius:999px; border:1px solid var(--line);
+    font-size:.82rem; cursor:pointer; background:var(--card); color:var(--ink-soft);
+  }
+  .chip.active{border-color:transparent; color:var(--ink); background:var(--accent-soft);}
+  .chip .dot{width:8px; height:8px; border-radius:50%; flex:none;}
+
+  .group{margin-bottom:1.75rem;}
+  .group-head{
+    display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem;
+    font-family:'Fraunces',serif; font-size:1.05rem; font-weight:600;
+  }
+  .group-head .dot{width:10px; height:10px; border-radius:50%; flex:none;}
+  .group-head .count{
+    font-family:'Inter',sans-serif; font-weight:500; font-size:.78rem;
+    color:var(--ink-soft); margin-left:.1rem;
+  }
+
+  ul.tasks{list-style:none; margin:0; padding:0;}
+  .task{
+    display:flex; align-items:flex-start; gap:.7rem;
+    padding:.65rem .2rem; border-bottom:1px solid var(--line);
+  }
+  .task:last-child{border-bottom:none;}
+  .task input[type="checkbox"]{
+    margin-top:.2rem; width:17px; height:17px; accent-color:var(--accent); cursor:pointer; flex:none;
+  }
+  .task .label{flex:1; font-size:.95rem; line-height:1.4; word-break:break-word;}
+  .task.done .label{color:var(--ink-soft); text-decoration:line-through;}
+  .task button.del{
+    background:none; border:none; color:var(--ink-soft); cursor:pointer;
+    font-size:1rem; line-height:1; padding:.2rem; flex:none;
+  }
+  .task button.del:hover{color:var(--danger);}
+
+  .empty{
+    text-align:center; color:var(--ink-soft); padding:3rem 1rem;
+    font-family:'Fraunces',serif; font-size:1.1rem;
+  }
+
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Today's list</h1>
+  <p class="sub">Sorted by category. Nothing leaves this browser.</p>
+
+  <div class="add-row">
+    <input type="text" id="taskInput" placeholder="Add a task…" maxlength="200">
+    <select id="catSelect"></select>
+    <button id="addBtn">Add</button>
+  </div>
+
+  <div class="cat-manage">
+    <input type="text" id="newCatName" placeholder="New category" maxlength="24">
+    <input type="color" id="newCatColor" value="#2F5D50">
+    <button id="addCatBtn">+ Category</button>
+  </div>
+
+  <div class="filters" id="filters"></div>
+
+  <div id="listArea"></div>
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'ledger-todo-v1';
+  var state = null;
+
+  function defaultState(){
+    return {
+      categories: [
+        {id:'c1', name:'Work', color:'#2F5D50'},
+        {id:'c2', name:'Personal', color:'#A3432F'},
+        {id:'c3', name:'Errands', color:'#8A6D3B'}
+      ],
+      tasks: [],
+      filter: 'all'
+    };
+  }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      var parsed = JSON.parse(raw);
+      if(!parsed.categories || !parsed.tasks) return defaultState();
+      if(!parsed.filter) parsed.filter = 'all';
+      return parsed;
+    }catch(e){
+      console.error('Load failed, starting fresh.', e);
+      return defaultState();
+    }
+  }
+
+  function save(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){
+      console.error('Save failed.', e);
+    }
+  }
+
+  function uid(){ return 'id' + Math.random().toString(36).slice(2,10); }
+
+  function escapeHtml(s){
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  var taskInput = document.getElementById('taskInput');
+  var catSelect = document.getElementById('catSelect');
+  var addBtn = document.getElementById('addBtn');
+  var newCatName = document.getElementById('newCatName');
+  var newCatColor = document.getElementById('newCatColor');
+  var addCatBtn = document.getElementById('addCatBtn');
+  var filtersEl = document.getElementById('filters');
+  var listArea = document.getElementById('listArea');
+
+  function renderCatSelect(){
+    catSelect.innerHTML = state.categories.map(function(c){
+      return '<option value="'+c.id+'">'+escapeHtml(c.name)+'</option>';
+    }).join('');
+  }
+
+  function renderFilters(){
+    var html = '<span class="chip'+(state.filter==='all'?' active':'')+'" data-filter="all">All</span>';
+    state.categories.forEach(function(c){
+      html += '<span class="chip'+(state.filter===c.id?' active':'')+'" data-filter="'+c.id+'">' +
+        '<span class="dot" style="background:'+c.color+'"></span>'+escapeHtml(c.name)+'</span>';
+    });
+    filtersEl.innerHTML = html;
+    Array.prototype.forEach.call(filtersEl.querySelectorAll('.chip'), function(chip){
+      chip.addEventListener('click', function(){
+        state.filter = chip.getAttribute('data-filter');
+        save();
+        renderFilters();
+        renderList();
+      });
+    });
+  }
+
+  function renderList(){
+    var cats = state.categories.filter(function(c){
+      return state.filter === 'all' || state.filter === c.id;
+    });
+
+    if(state.tasks.length === 0){
+      listArea.innerHTML = '<div class="empty">Nothing on the list yet. Add your first task above.</div>';
+      return;
+    }
+
+    var html = '';
+    var anyShown = false;
+
+    cats.forEach(function(c){
+      var items = state.tasks.filter(function(t){ return t.catId === c.id; });
+      if(items.length === 0) return;
+      anyShown = true;
+      items.sort(function(a,b){ return (a.done - b.done) || (a.order - b.order); });
+      html += '<div class="group">';
+      html += '<div class="group-head"><span class="dot" style="background:'+c.color+'"></span>' +
+        escapeHtml(c.name) + '<span class="count">' + items.filter(function(t){return !t.done;}).length + ' open</span></div>';
+      html += '<ul class="tasks">';
+      items.forEach(function(t){
+        html += '<li class="task'+(t.done?' done':'')+'" data-id="'+t.id+'">' +
+          '<input type="checkbox" '+(t.done?'checked':'')+' aria-label="Mark done">' +
+          '<span class="label">'+escapeHtml(t.text)+'</span>' +
+          '<button class="del" aria-label="Delete task" title="Delete">✕</button>' +
+          '</li>';
+      });
+      html += '</ul></div>';
+    });
+
+    // orphaned tasks (category deleted) shown under "Uncategorized" when filter is all
+    if(state.filter === 'all'){
+      var catIds = state.categories.map(function(c){return c.id;});
+      var orphans = state.tasks.filter(function(t){ return catIds.indexOf(t.catId) === -1; });
+      if(orphans.length){
+        anyShown = true;
+        orphans.sort(function(a,b){ return (a.done - b.done) || (a.order - b.order); });
+        html += '<div class="group"><div class="group-head"><span class="dot" style="background:#999"></span>Uncategorized</div><ul class="tasks">';
+        orphans.forEach(function(t){
+          html += '<li class="task'+(t.done?' done':'')+'" data-id="'+t.id+'">' +
+            '<input type="checkbox" '+(t.done?'checked':'')+' aria-label="Mark done">' +
+            '<span class="label">'+escapeHtml(t.text)+'</span>' +
+            '<button class="del" aria-label="Delete task" title="Delete">✕</button></li>';
+        });
+        html += '</ul></div>';
+      }
+    }
+
+    listArea.innerHTML = anyShown ? html : '<div class="empty">No tasks in this category yet.</div>';
+
+    Array.prototype.forEach.call(listArea.querySelectorAll('.task'), function(li){
+      var id = li.getAttribute('data-id');
+      li.querySelector('input[type="checkbox"]').addEventListener('change', function(e){
+        var t = state.tasks.find(function(x){return x.id===id;});
+        if(t){ t.done = e.target.checked; save(); renderList(); }
+      });
+      li.querySelector('.del').addEventListener('click', function(){
+        state.tasks = state.tasks.filter(function(x){return x.id!==id;});
+        save(); renderList();
+      });
+    });
+  }
+
+  function addTask(){
+    var text = taskInput.value.trim();
+    if(!text) return;
+    var catId = catSelect.value;
+    var maxOrder = state.tasks.reduce(function(m,t){return Math.max(m,t.order||0);},0);
+    state.tasks.push({id:uid(), text:text, catId:catId, done:false, order:maxOrder+1});
+    taskInput.value = '';
+    save();
+    renderList();
+    renderFilters();
+    taskInput.focus();
+  }
+
+  function addCategory(){
+    var name = newCatName.value.trim();
+    if(!name) return;
+    state.categories.push({id:uid(), name:name, color:newCatColor.value});
+    newCatName.value = '';
+    save();
+    renderCatSelect();
+    renderFilters();
+    renderList();
+  }
+
+  addBtn.addEventListener('click', addTask);
+  taskInput.addEventListener('keydown', function(e){ if(e.key==='Enter') addTask(); });
+  addCatBtn.addEventListener('click', addCategory);
+  newCatName.addEventListener('keydown', function(e){ if(e.key==='Enter') addCategory(); });
+
+  state = load();
+  renderCatSelect();
+  renderFilters();
+  renderList();
+})();
+</script>
+</body>
+</html>
